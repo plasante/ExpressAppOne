@@ -1,8 +1,24 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+const res = require("express/lib/response");
+const multer = require('multer');
 
-app = express();
+// Define storage for the multer middleware
+var storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, './uploads'); // Destination folder
+  },
+  filename: function(req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now()); // Filename along with the current date
+  }
+});
+
+var upload = multer({ storage: storage }).single('myfile');
+
+var app = express();
 app.use(bodyParser.json());
+//app.use(multer.array());
+app.use(express.static('public'));
 
 app.get("/one", function (req, res) {
   res.end("This is simple end string response");
@@ -104,10 +120,56 @@ app.get("/eight", function (req, res) {
 // })
 
 // Post Data in Body as JSON
-app.post("/", function (req, res) {
-  let JSONData = req.body;
-  let JSONString = JSON.stringify(JSONData);
-  res.send(JSONString);
+// app.post("/", function (req, res) {
+//   let JSONData = req.body;
+//   let JSONString = JSON.stringify(JSONData);
+//   res.send(JSONString);
+// })
+
+// MultiForm Data
+// app.post("/", function (req, res) {
+//
+//   let JSONData = req.body;
+//   console.log(JSONData);
+//   res.send(JSON.stringify(JSONData));
+// })
+
+// Uploading a file
+// app.post("/", function (req, res) {
+//   upload(req, res, function (error){
+//     if (error) {
+//       res.status(500).send("An error occurred while uploading the file.");
+//       return;
+//     }
+//     res.status(200).send("File uploaded successfully.");
+//   })
+// })
+
+// Middleware function to intercept any request and send response to next
+// app.use(function (req, res, next) {
+//   console.log('I am from middleware validation');
+//   next();
+// })
+
+//  Home page
+app.get('/', function (req, res) {
+  res.send('This is home page')
+})
+
+//  About page
+app.get('/about', function (req, res,next) {
+  console.log('I am from About validation');
+  next();
+})
+
+app.get('/about', function (req, res) {
+  console.log('Sending response from About route');
+  res.send('This is about page');
+})
+
+//  Contact page
+app.get('/contact', function (req, res) {
+  res.send('This is Contact page')
 })
 
 app.listen(8000, function () {
